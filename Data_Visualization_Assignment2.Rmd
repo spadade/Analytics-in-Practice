@@ -1,0 +1,375 @@
+---
+title: 'Analytics in Practice - Assignment 2: Data Visualization'
+author: "Srushti Padade"
+date: "April 10, 2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+##Problem Statement
+
+An Airport manager is receiving complaints from customers regarding the delays in departure and arrival of flights. He thinks that there are hardly any delays and even if there are any delays, it is mostly due to weather. But he is unable to convince his supervisor. He has now hired you, a Data Scientist, a graduate from Kent State University. Your job is to explain to the Airport manager about the overall delays at the Airport. You have been provided with complete air traffic data to analyze. Your task is to analyze the data and provide insights about the delays. Following are the set of questions, he is looking for an answer from you.
+
+- To Solve the problem faced by the Airport manager we are using Data Visualization techniques to make it easier for the management to have a clear idea of the situation.
+
+- The libraries used would be as below for the data wrangling as well as the data visualization.
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+options(warn = -1)
+```
+
+- Here we are loading the data set with the Flight details of the California State in United States.
+- The data contained in the compressed file has been extracted from the Marketing Carrier On-Time Performance (Beginning January 2018) data table of the "On-Time" database from the TranStats data library.
+
+```{r}
+FlightData <- read.csv("Sample_CA_airtraffic_delays.csv")
+dim(FlightData)
+```
+
+#1. What is the pattern of arrival traffic and departure traffic delays with respect to days and weeks?
+
+```{r}
+DelayOnMonths <- FlightData %>% select("DayofMonth","DepDelay","ArrDelay", "CarrierDelay","WeatherDelay") %>% gather("Delay_Type","Delay_Time", -1) %>% 
+  filter(Delay_Time > 0) %>% group_by(DayofMonth,Delay_Type) %>% summarise(Frequency = n())
+
+head(DelayOnMonths)
+```
+
+#Answer:
+
+- The above table is a glimpes of data that is  wrangled to extract the frequency of arrival as well as departure traffic delay by filtering it from the early arrived or departed flights on DAYS of MONTHs bases.
+- Also I have included Carrier and weather type delay where PURPLE represents Weather Delay which is very rare and GREEN represents Carrier Delay which also is minimal.
+
+```{r}
+ggplot(DelayOnMonths, aes(DayofMonth, Frequency)) + 
+  geom_line(aes(color = Delay_Type)) + 
+  labs(title = "Montly Flight Delay Frequency",  x = "Days of Month",  y ="Total Count of Delay") + 
+  geom_point(aes(color = Delay_Type)) +
+  scale_x_continuous(breaks = seq(1, 31, by = 5)) +
+  theme(legend.position="top", panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+```
+
+- The graph displayed above represents the pattern of how the Arrival & Departure Traffic Delay is featured based on month.
+
+- As we can see the plot there are 2 lines, RED representing Arrival Traffic Delay pattern and BLUE line representing Departure Traffic Delay pattern.
+
+- Here we observe that the Departure traffic delay frequency varies a lot than that of Arrival Traffic. Also the delay is likely to be more at the begining of the month and then we see delay frequency going down by the end of the month.
+
+- Below is the data that tells us the story about the Flight Delay based on DAYS OF WEEK.
+
+```{r}
+DelayOnWeeks <- FlightData %>% select("DayOfWeek","DepDelay","ArrDelay", "CarrierDelay","WeatherDelay") %>%
+  gather("Delay_Type","Delay_Time",-1) %>%  filter(Delay_Time > 0) %>% 
+  group_by(DayOfWeek,Delay_Type) %>% summarise(Frequency = n())
+
+head(DelayOnWeeks)
+```
+
+- The plot shows the frequency count of Arrival Traffic delay in RED and Departure Traffic Delay in BLUE.
+
+- Based on the plot we can conclude that the delay rate is much higher at the start of the week and slowly goes down as the week comes to an end. Also the Departure Delay is much higher than Arrival Delay.
+
+- Also i have included Carrier and weather type delay where PURPLE represents Weather Delay which is very rare and GREEN represents Carrier Delay which also is minimal.
+
+```{r}
+ggplot(DelayOnWeeks, aes(DayOfWeek, Frequency)) + 
+  geom_point(aes(color = Delay_Type)) + geom_line(aes(color = Delay_Type)) +
+  labs(title = "Weekly Flight Delay Frequency",  x = "Days of Week",  y ="Total Count of Delay") + 
+  scale_x_discrete(breaks=c("1","2","3", "4", "5", "6","7"),
+  labels=c("Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"), limits = c(1,2,3,4,5,6,7)) + 
+  theme(legend.position="top", panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+```
+
+#2. Can you interpret the traffic delays?
+
+```{r}
+# Montly Delay
+ggplot(DelayOnMonths, aes(DayofMonth, Frequency)) + 
+  labs(title = "Montly Flight Delay Frequency",  x = "Days of Month",  y ="Total Count of Delay") + 
+  geom_smooth(method = "loess", se = FALSE) +
+  scale_x_continuous(breaks = seq(1, 31, by = 5)) +
+  theme(legend.position="top", panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+```
+
+```{r}
+# Weekly Delay
+ggplot(DelayOnWeeks, aes(DayOfWeek, Frequency)) + 
+  geom_smooth(method = "loess", se = FALSE, size = 1) +
+  labs(title = "Weekly Flight Delay Frequency",  x = "Days of Week",  y ="Total Count of Delay") + 
+  scale_x_discrete(breaks=c("1","2","3", "4", "5", "6","7"),
+  labels=c("Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"), limits = c(1,2,3,4,5,6,7)) + 
+  ylim(190, 400) + 
+  theme(legend.position="top", panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+```
+
+#Answer:
+
+- Considering the same data wrangled todetermine traffic delay for days of week and days of month above graphs are interpreted.
+
+- As we look at the graph we can see the clear picture of how the Arrival and departure traffic delay have occured over the Days of the Month and Days of week.
+
+- We can say that the delay in approximately higher at the start of the Month i.e. dated as 1st of the month or it is Monday of the week.
+
+- As the days pass by the delay frequency is less by the end of the Month 30th or 31th of Month or Saturday/Sunday of the Weeks.
+
+- Thus we can interpret the Highest delay frequency of more than 350 times on Mondays and as high as 80 times on 1st of the Months in 2018 in California.
+
+#3. Which Airport ('Origin Airport') has highest departure delay?
+
+```{r}
+Departure_Delay <- FlightData  %>% filter(DepDelay > 0)%>% select("Origin","OriginCityName") %>% 
+  group_by(OriginCityName) %>% summarise(Count=n())
+
+Departure_Delay
+```
+
+#Answer:
+
+- By some data extraction we have found the total count of Flight departure delay among all the California City Airports.
+
+- Below graph represents the scale at which the Departure Delay frequency is based on the Cities. Here, Los Angles have highest departure delay and Lowest in Sacramento.
+
+```{r}
+ggplot(Departure_Delay, aes(OriginCityName, Count)) + 
+  geom_col(aes(fill = Count), width = 0.65) + 
+  scale_fill_gradient2(low="white", high="red") +
+  geom_text(aes(OriginCityName, Count, label = Count), vjust = -0.3) +
+  theme(legend.position = "none", panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  labs(title = "Rate of City wise Departure Delay",  x = "Cities in California",  y ="Total Count of Delay") 
+```
+
+#4. Which Airport has highest Arrival delay?
+
+```{r}
+Arrival_Delay <- FlightData  %>% filter(ArrDelay > 0)%>% select("Origin","OriginCityName") %>% 
+  group_by(OriginCityName) %>% summarise(Count=n())
+
+Arrival_Delay
+```
+
+#Answer
+
+- Similar to the Departure delay, after data extraction we have found the total count of Flight arrival delay among all the California City Airports.
+
+- Below graph represents the scale at which the Arrival Delay frequency is based on the Cities. Here, Los Angles have highest arrival delay and Lowest in San Jose.
+
+```{r}
+ggplot(Arrival_Delay, aes(OriginCityName, Count)) + 
+  geom_col(aes(fill = Count), width = 0.65) + 
+  scale_fill_gradient2(low="white", high="brown") +
+  geom_text(aes(OriginCityName, Count, label = Count), vjust = -0.3) +
+  theme(legend.position = "none", panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  labs(title = "Rate of City wise Arrival Delay",  x = "Cities in California",  y ="Total Count of Delay") 
+```
+
+#5. How do you relate the delay pattern to the distance travelled?
+
+```{r}
+DelayByDistance <- FlightData %>% select("DistanceGroup","DepDelay","ArrDelay") %>% 
+  gather("Delay_Type","Delay_Time", -1)%>% group_by(DistanceGroup,Delay_Type)%>% filter(Delay_Time > 0) %>% 
+  group_by(DistanceGroup,Delay_Type) %>% summarise(Frequency = n())
+
+head(DelayByDistance)
+```
+
+#Answer
+
+- We have gathered the group of distances travelled by the Flights and the filtered them based on the Traffic delay for both Arrival and departure flights to know the frequency of flight delay at certain distance.
+
+- The below graph displays the Distance to type of Flight delay in Miles.
+- RED line graph displays the Arrival delay pattern based on distance whereas BLUE plot displays the departure delay.
+- The DARK BLUE line shows the pattern of how exactly the flight delay is affected based on the distance travelled.
+
+- Thus looking at the plot we can conclude that the flights with nearby locations are facing highers delays and as the distance increases the delay in flight become lesser and lesser in an approximation.
+- The highest delay is over the 250 to 750 miles.
+
+```{r}
+ggplot(DelayByDistance, aes(DistanceGroup, Frequency)) + 
+  geom_line(aes(color = Delay_Type)) + geom_point(aes(color = Delay_Type)) +
+  labs(title = "Flight Delay Frequency based on Distance",  x = "Distance(in Miles)",  y ="Delay Frequency") + 
+  geom_smooth(method = "loess", se = FALSE, size = 1) + theme(legend.position="top") +
+  scale_x_discrete(limit=c(1:11), labels=c("0-250", "251-500", "501-750", "751-1000", "1001-1250", "1251-1500", "1501-1750", "1751-2000", "2001-2250", "2251-2500","2501-2750")) +
+  coord_flip()
+```
+
+#6. Is there any correlation between weather delay and carrier delay?
+
+```{r}
+DataWC <- na.omit(cbind.data.frame(Weather = round(FlightData$WeatherDelay/60), Carrier = round(FlightData$CarrierDelay/60)))
+summary(DataWC)
+
+Correlation <- cor(DataWC)
+Correlation
+```
+
+#Answer
+
+- Looking at the raw data it is very difficult to extract any information. Hence we have altered the data by changing the time frame from minutes to hours.
+- Also I have computed the correlation value between the Carrier Delay and Weather Delay, which is -0.0315184 i.e. they are negatively correlated.
+
+- Thus by looking at the graph we could see the the the carrier delay and the weather delay gives a right angle graph and doesn't give much information.
+
+```{r}
+ggplot(DataWC, aes(Weather, Carrier)) + geom_point() + scale_x_discrete(limit=c(0:14))+ scale_y_discrete(limit=c(0:13)) +
+  labs(title = "Carrier to Weather Delay", x = "Weather Delay(in Hours)",  y ="Carrier Delay(in Hours)")
+```
+
+- Also by calculatinng the correlation value of the data, below correlation plot is drawn. 
+
+```{r}
+corrplot::corrplot(Correlation)
+```
+
+#7. What is the delay pattern you can find in respective states?
+
+```{r}
+DelayPatterns <- FlightData %>% select("OriginCityName","ArrDelay","DepDelay","CarrierDelay","WeatherDelay") %>% 
+  gather("Delay_Type","Delay_Time",-1) %>% filter(Delay_Time > 0) %>% 
+  group_by(OriginCityName,Delay_Type)  %>% summarise(Frequency=n())
+
+head(DelayPatterns)
+```
+
+#Answer
+
+- To extract delay patterns we have computed the delay frequency in each city of California state based on the delay types.
+- Above is a glimps of the data that is extracted.
+
+- Thus, looking at the result below graph is computed having a grid of 4 parts each having a delay pattern of eachh city based on the type of delay.
+- Hence we see the major delay is occured due to the Departure delay and in the city of Los Angeles.
+
+```{r}
+ggplot(DelayPatterns, aes(OriginCityName, Frequency)) + 
+  geom_bar(stat = "identity", position = position_stack(reverse = TRUE), fill="navy") + 
+  labs(title = "City wise Statistical Reasoning of Flight Delay in CA",  x = "Cities in California",  y ="Frequency") +
+  geom_text(aes(OriginCityName, Frequency, label = Frequency),  hjust = -0.1) +
+  theme(legend.position="top", panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  facet_wrap("Delay_Type") + coord_flip()
+```
+
+#8. How many delayed flights were cancelled? (approximation)
+
+```{r}
+Cancelled <- FlightData %>% select("Cancelled","ArrDelay","DepDelay","CarrierDelay","WeatherDelay") %>% 
+  gather("Delay_Type","Delay_Time",-1)%>%  filter(Delay_Time > 0) %>% 
+  group_by(Cancelled,Delay_Type) %>% summarise(Count = n())
+
+head(Cancelled)
+```
+
+#Answer
+
+- We have computed the total count of Delayed flights that were cancelled eventually.
+- The below graph displayed all the type of Delays and due to which the actual count of Cancelled flights can be distinguished.
+
+- The RED plot determines the Cancelled flights after the delay. Here total of 44 flights were cancelled which were originally having Departure delay. 
+- Hence we have focus mainly on the Cancelled flights in the plot.
+
+```{r}
+ggplot(Cancelled, aes(Delay_Type, Count)) + geom_col(aes(fill = Cancelled ==1)) + 
+  geom_text(aes(Delay_Type, Count, label = Count),  vjust = -0.8) +
+  theme(legend.position="top", panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  labs(title = "",  x = "Statistics of Delayed to Cancelled flights",  y ="Count") +
+  scale_fill_manual(name = " ", values = c('pink', 'red'), breaks = c("FALSE","TRUE"), label = c("Flight Scheduled", "Flight Cancelled"))
+```
+
+#9. How many delayed flights were diverted? (approximation)
+
+```{r}
+Diverted <- FlightData %>% select("Diverted","ArrDelay","DepDelay","CarrierDelay","WeatherDelay") %>% 
+  gather("Delay_Type","Delay_Time",-1)%>%  filter(Delay_Time > 0) %>% group_by(Diverted,Delay_Type) %>% summarise(Count = n())
+
+head(Diverted)
+```
+
+#Answer
+
+- We have computed the total count of Delayed flights that were diverted eventually.
+- The below graph displayed all the type of Delays and due to which the actual count of Diverted flights can be distinguished.
+
+- The RED plot determines the Cancelled flights after the delay. Here total of 44 flights were diverted which were originally having Departure delay. 
+- Hence we have focus mainly on the Diverted flights in the plot.
+
+```{r}
+ggplot(Diverted, aes(Delay_Type, Count)) + geom_col(aes(fill = Diverted == 1)) + 
+  geom_text(aes(Delay_Type, Count, label = Count),  vjust = -0.3) +
+  theme(legend.position="top", panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  labs(title = "",  x = "Statistics of Delayed to Diverted flights",  y ="Count") +
+  scale_fill_manual(name = " ", values = c('grey', 'blue'), breaks = c("FALSE","TRUE"), label = c("Flight Scheduled", "Flight Diverted"))
+```
+
+#10. What time of the day do you find Arrival delays?
+
+```{r}
+Arrival_DelayByTime <- FlightData  %>% filter(ArrDelay > 0)%>% select("ArrDelay","ArrTimeBlk") %>% 
+  group_by(ArrTimeBlk) %>% summarise(Count=n())
+
+head(Arrival_DelayByTime)
+```
+
+#Answer
+
+- The data is filtered out in a way where we extract the count of arrival delay at particular time of the day.
+
+- Thus the below graph can help us display a clear picture on what time of the day the arrival delay is prominent.
+- To give a focus point for the management to take decisions I have highlighted the top Arrival delay timestamps.
+- Thus we see that the maximum delay on arrival traffic is during the 8 to 10 PM whereas it is minimum during the late night and earlt mornings.
+
+```{r}
+ggplot(Arrival_DelayByTime, aes(ArrTimeBlk, Count)) + 
+  geom_col(aes(fill = Count > 125), width = 0.65) + 
+  scale_fill_manual(name = " ", values = c('grey', 'navy'))+
+  geom_text(aes(ArrTimeBlk, Count, label = Count), hjust = -0.1) +
+  theme(legend.position = "none") + coord_flip() +
+  labs(title = "Arrival Delay by Time",  x = "Arrival Time of the Day",  y ="Total Count of Delay") 
+```
+
+#11. What time of the day do you find Departure delays?
+
+```{r}
+Departure_DelayByTime <- FlightData  %>% filter(DepDelay > 0)%>% select("DepDelay","DepTimeBlk") %>% 
+  group_by(DepTimeBlk) %>% summarise(Count=n())
+
+head(Departure_DelayByTime)
+```
+
+#Answer
+
+- The data is filtered out in a way where we extract the count of departure delay at particular time of the day.
+
+- Thus the below graph can help us display a clear picture on what time of the day the arrival delay is prominent.
+- To give a focus point for the management to take decisions I have highlighted the top Arrival delay timestamps.
+- Thus we see that the departure delay takes place at anytime time of the day, not a particular part of the day but throughout.
+
+```{r}
+ggplot(Departure_DelayByTime, aes(DepTimeBlk, Count)) + 
+  geom_col(aes(fill = Count > 145), width = 0.65) + 
+  scale_fill_manual(name = " ", values = c('grey', 'navy'))+
+  geom_text(aes(DepTimeBlk, Count, label = Count), hjust = -0.1) +
+  theme(legend.position = "none") + coord_flip() +
+  labs(title = "Departure Delay by Time",  x = "Departure Time of the Day",  y ="Total Count of Delay") 
+```
+
+#To conclude we can say that the arrival traffic and departure traffic takes place at the diffent time of the day.
+
+# Clean data without any NA values.
+
+```{r}
+Clean_data <- FlightData[!sapply(FlightData, anyNA)]
+dim(Clean_data)
+
+summary(Clean_data)
+```
+
+#References
+
+1. https://www.transtats.bts.gov/
+2. Data Visualization: druhrao-ml-data--visualization-08242017_310311.pdf - by Professor Dr. Umesh R Hodeghatta
+3. Data Visualization - ggplots.pdf - by Professor Dr. Umesh R Hodeghatta
+3. https://www.datacamp.com/courses/data-visualization-with-ggplot2-1
+4. https://www.datacamp.com/courses/data-visualization-with-ggplot2-2

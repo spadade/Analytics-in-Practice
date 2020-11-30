@@ -1,0 +1,227 @@
+---
+title: "Data Visualization - Case Study 1 to 4"
+author: "Srushti Padade"
+date: "April 7, 2020"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+#CLASS PRACTICE 1
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+options(warn=-1)
+```
+
+1. Plot the below Graph:
+
+```{r}
+ggplot(mpg, aes(x=displ, y = hwy)) + 
+  geom_point()
+```
+
+2. How would you describe the relationship between cty and hwy (plot graph using ggplot)? Do you have any concerns about drawing conclusions from that plot?
+
+```{r}
+ggplot(mpg, aes(x = cty, y = hwy)) +
+  geom_point()
+```
+
+Answer:
+The 'cty' and 'hwy' variables describe the fuel economy. By looking in the graph we can see a clear positive Linear relationship between them.
+Generally, cars are more fuel efficient on highways rather than in cities due to inbuild speed functionality.
+However here We can infer that, cars that are fuel efficient both on highway as well as city roads.
+Drawing this conclusion was easy using the above plot as the clear picture could be seen.
+
+3. Plot the following graph and explain the output:
+
+```{r}
+ggplot(mpg, aes(model, manufacturer)) + 
+  geom_point()
+```
+
+Answer:
+The plot represents relation between each mactufacturer with the car models. By looking at the scattered plot no defined conclusion could be drawn.
+
+4. Is the above graph useful? How could you modify the data to make it more informative?
+
+Answer:
+Since the original plot could not be used to infer and particular relation ship between the manufacturer and there models.
+
+Thus we have tried to  manipulate the manufacturer to its models relation to understand the rate at which the Fuel consumption for each pair of Manufacturer and the model.
+
+```{r}
+Combine_ManufacturerToModel <- mpg %>% 
+  transmute("ManufacturerToModel" = paste(manufacturer, model, sep = " - "))
+
+ggplot(Combine_ManufacturerToModel, aes(ManufacturerToModel)) +
+  geom_bar() + coord_flip()
+```
+
+#CLASS PRACTICE 2
+
+1. Plot the following using ggplot()
+```{r}
+ggplot(mpg, aes(x=displ, y = cty, colour = class)) +
+  geom_point()
+```
+
+2.	Plot the following (adding one more dimension):
+
+```{r}
+ggplot(mpg, aes(x=displ, y = hwy, shape = drv)) + 
+  	geom_point(colour = "orange")
+```
+
+3.	Plot the following graph (adding more dimensions)
+
+```{r}
+ggplot(mpg, aes(x=displ, y = cty, size = drv)) + 
+ geom_point(colour="green")
+```
+
+4.	Plot the following graph:
+
+```{r}
+ggplot(mpg, aes(x=displ, y = hwy, shape = drv, color = class)) + 
+  geom_point()
+```
+
+5.	Plot the following graph:
+
+```{r}
+ggplot(mpg, aes(x=displ, y = hwy, shape = drv, color = class, size = cyl)) + 
+  geom_point()
+```
+
+6. How is drive train related to fuel economy? Plot and show
+
+```{r}
+#Fuel economy in CITY
+ggplot(mpg, aes(drv, cty)) + 
+  geom_boxplot() +
+  scale_x_discrete(limits = c("f", "r", "4"),
+                   labels = c("Front wheel", "Rear wheel", "Four wheel"))
+#fuel economy in HIGHWAY
+ggplot(mpg, aes(drv, hwy)) + 
+  geom_boxplot() +
+  scale_x_discrete(limits = c("f", "r", "4"),
+                   labels = c("Front wheel", "Rear wheel", "Four wheel"))
+```
+
+Answer:
+
+Front wheeler vehicles are more fuel efficient for both highway and City drives.
+
+7.	How is drive train related to engine size and class? Plot and show
+
+```{r}
+ggplot(mpg, aes(class, displ, color = drv)) + geom_point()
+```
+
+Answer:
+- From the above plot we can say that cars of class 'suv', pickup have large engine size and most of them are four wheel drive.
+- Cars of Class 'compact', 'subcompact', 'midsize', and 'minivan' have comparetively less engine size and most of them are front wheel drive.
+- 'Two seater' cars have large engine size than any other and all of them are rear wheel drive.
+
+8.	What happens if you map trans variable to shape? Why?
+
+```{r}
+ggplot(mpg, aes(cty, hwy, shape = trans)) + 
+  geom_point()
+```
+
+Answer:
+The shape palette can deal with a maximum of 6 discrete values because more than 6 becomes difficult to discriminate; you have 10. Consider specifying shapes manually if you must have them.
+Removed 96 rows containing missing values (geom_point).
+Hence loss of our data.
+
+#CLASS PRACTICE 3
+
+1. Plot this graph using ggplot()
+
+```{r}
+ggplot(mpg, aes(displ,cty)) +
+geom_point(colour="orange")  + facet_wrap(~class)
+```
+
+2. Use facetting to explore the 3-way relationship between fuel economy, engine size, and number of cylinders. 
+
+```{r}
+#For cities
+ggplot(mpg, aes(displ, cty)) + 
+  geom_point() +
+  facet_wrap(~ cyl)
+```
+
+```{r}
+#For highways
+ggplot(mpg, aes(displ, hwy)) + 
+  geom_point() +
+  facet_wrap(~ cyl)
+```
+
+3.	How does facetting by number of cylinders change your assessment of the relationship between engine size and fuel economy?
+
+Answer:
+- 4 cylinders the relationship between fuel economy and engine size is negatively related.
+- 5 cylinders we cannot intrepret any relation 
+- 6 cylinders there is no much change in fuel economy with the increase of engine size but still we can say that is negatively related.
+- 8 cylinders it is same as 6 cylinders but this is positively related.
+
+#CLASS PRACTICE 4
+
+1. Plot the following graph (adding smooth()):
+
+```{r}
+ggplot(mpg, aes(x=displ, y = cty)) +
+  geom_point(colour="green") + 
+  geom_smooth()
+```
+
+2. Change the method to linear (method="lm")
+
+```{r}
+ggplot(mpg, aes(x=displ, y = cty)) + 
+  geom_point(colour="green") +
+  geom_smooth(method = "lm")
+```
+
+3. Changing the span parameter to control wiggliness of the line:
+
+```{r}
+ggplot(mpg, aes(x=displ, y = cty)) +
+  geom_point(colour="red") + 
+  geom_smooth(span=0.4)
+```
+
+4. How is this smooth() function useful in interpreting results?
+
+Answer:
+It can be hard to view trends with just points alone. Many times we wish to add a smoothing line in order to see what the trends look like. This can be especially helpful when trying to understand regressions.
+It aids the eye in seeing patterns in the presence of overplotting.
+
+5.	Can you use this to explain this to a senior management executive
+
+Answer: 
+The normal plot shoews the scatter plot of the data and is difficut to interpret. As a senior management the smoothened line provided by the smooth function, it is easier to get a clear picture to the data and what inference that could be taken out of it.
+
+6.	Try changing span parameter, Values range from 0 to 1
+
+```{r}
+ggplot(mpg, aes(x=displ, y = cty)) +
+  geom_point(colour="red") + 
+  geom_smooth(span=0.1)
+```
+
+```{r}
+ggplot(mpg, aes(x=displ, y = cty)) +
+  geom_point(colour="red") + 
+  geom_smooth(span=1)
+```
+
+Answer:
+When we changed the span = 1 we can see that this is much smoother. The span can be varied from 0 to 1, where 0 is very rough and 1 is very smooth.

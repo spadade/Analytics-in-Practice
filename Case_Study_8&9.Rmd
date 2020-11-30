@@ -1,0 +1,165 @@
+---
+title: "Data Visualization - Case Study 8 to 9"
+author: "Srushti Padade"
+date: "April 13, 2020"
+output:
+  html_document: default
+  word_document: default
+---
+
+```{r}
+library(ggplot2)
+library(dplyr)
+```
+
+#CLASS PRACTICE - 8
+
+1.	 Plot the following graph and label as shown:
+
+```{r}
+ggplot(economics, aes(date, unemploy)) +
+  geom_line() + 
+  labs(title = "Unemployment Rates",  y="Unemployment",  x="Year", caption = "Unemployment Rates")
+```
+
+2.	Execute the following program to annotate the graph:
+
+```{r}
+p <- ggplot(mpg, aes(displ, cty)) + 
+  geom_point(data = filter(mpg, manufacturer == "audi"), colour = "red", size = 3) + 
+  geom_point() 
+
+p + 
+  annotate(geom = "curve", x = 3, y = 35, xend = 2.8, yend = 20, curvature = .3, arrow = arrow(length = unit(2, "mm"))) +
+  annotate(geom = "text", x = 3.1, y = 35, label = "Audi", hjust = "left")
+```
+
+```{r}
+#install.packages("ggforce")
+library(ggforce)
+
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point() + 
+  geom_mark_ellipse(aes(label = cyl, group = cyl))
+```
+
+```{r}
+#install.packages("gghighlight")
+library("gghighlight")
+
+ggplot(mpg, aes(displ, cty, colour = factor(drv))) +
+  geom_point() + 
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(drv))
+```
+
+3.	Try following plots:
+
+```{r}
+#Plot 1:
+  ggplot(mpg, aes( displ,cty)) + 
+  geom_point() + 
+  geom_smooth()
+```
+
+```{r}
+#Plot 2:
+  ggplot(mpg, aes(cty,displ)) + 
+  geom_point() + 
+  geom_smooth()
+```
+
+```{r}
+#Plot 3:
+  ggplot(mpg, aes(displ, cty)) + 
+  geom_point() + 
+  geom_smooth() + 
+  coord_flip()
+```
+
+4.	Using "Annotation" discussed earlier, highlight car type "Honda"
+
+```{r}
+q <- ggplot(mpg, aes(displ, cty)) + 
+  geom_point(data = filter(mpg, manufacturer == "Honda"), colour = "orange", size = 3) + 
+  geom_point() 
+
+  
+q + 
+  annotate(geom = "curve", x = 3, y = 30, xend = 2, yend = 27, curvature = .3, arrow = arrow(length = unit(2, "mm"))) +
+  annotate(geom = "text", x = 3.1, y = 30, label = "Honda", hjust = "left")
+```
+
+5.	Using ggforce() to highlight the "Class" of cars on "City" mileage based on engine (displ)
+
+```{r}
+ggplot(mpg, aes(displ, cty)) +
+  geom_point() + 
+  geom_mark_ellipse(aes(label = class, group = class))
+```
+  
+6.	Using gghighlight() cluster "transmission" type
+
+```{r}
+ggplot(mpg, aes(displ, cty, colour = factor(trans))) +
+  geom_point() + 
+  gghighlight() + 
+  facet_wrap(vars(trans))
+```
+
+#CLASS PRACTICE 9
+
+1. Execute the following commands to build the first layer:
+
+```{r}
+a <-ggplot(mpg, aes(displ, hwy))
+a
+```
+
+2.  Add aesthetics to the plot:
+
+```{r}
+b <- a + 
+  layer(
+    mapping = NULL, 
+    data = NULL,
+    geom = "point", 
+    stat = "identity",
+    position = "identity"
+  )
+
+b
+```
+
+3.  Can you change "colour" of points?
+
+```{r}
+b +
+  geom_point(color = "red")
+```
+
+4.  Fit the line to the data points by executing following ggplot() program:
+
+```{r}
+ggplot(mpg, aes(displ, hwy, colour = class)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE) +
+  theme(legend.position = "none")
+```
+
+```{r}
+ggplot(mpg, aes(displ, hwy)) + 
+  geom_point(aes(colour = class)) + 
+  geom_smooth(method = "lm", se = FALSE) + 
+  theme(legend.position = "none")
+``` 
+
+4. Add two different type of line "methods" by executing following program:
+
+```{r} 
+ggplot(mpg, aes(displ, hwy)) + 
+  geom_point() +
+  geom_smooth(aes(colour = "loess"), method = "loess", se = FALSE) + 
+  geom_smooth(aes(colour = "lm"), method = "lm", se = FALSE) +
+  labs(colour = "Method")
+```

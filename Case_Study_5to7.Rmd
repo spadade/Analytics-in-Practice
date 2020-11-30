@@ -1,0 +1,168 @@
+---
+title: "Data Visualization - Case Study 5 to 7"
+author: "Srushti Padade"
+date: "April 11, 2020"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r}
+library(ggplot2)
+```
+
+#CLASS PRACTICE 5
+
+1.	Plot the histogram using ggplot()
+
+```{r}
+ggplot(mpg, aes(hwy)) +
+  geom_histogram()
+```
+
+2.	Plot the distribution of the variables using geom_freqpoly()
+
+```{r}
+ggplot(mpg, aes(hwy)) +
+  geom_freqpoly()
+```
+
+3.	Plot box plot using geom_boxplot()
+
+```{r}
+ggplot(mpg)+ 
+  geom_boxplot(aes(x = displ, y = cty))
+```
+
+4.	What is the purpose of Histograms and Density plot?
+
+Answer:
+A Density Plot visualises the distribution of data over a continuous interval or time period. This chart is a variation of a Histogram that uses kernel smoothing to plot values, allowing for smoother distributions by smoothing out the noise. This requires using a density scale for the vertical axis.
+
+A histogram can be used to compare the data distribution to a theoretical model, such as a normal distribution.
+
+5.	Name another Univariate plot?
+
+Answer:
+Univearite plots are :
+- Histogram
+- Density Plot
+- Bar plot
+
+```{r}
+ggplot(mpg, aes(displ)) + 
+  geom_bar()
+```
+
+6.	Plot the following using ggplot() + facet_wrap()
+
+```{r}
+ggplot(mpg, aes(cty, fill = drv)) +
+  geom_histogram(binwidth = 0.5) +
+  facet_wrap(~drv, ncol = 1)
+```
+
+7.	Plot the following graph:
+
+```{r}
+ggplot(mpg, aes(displ,color = class)) + geom_freqpoly(binwidth = 0.5)
+```
+
+CLASS PRACTICE 6 - TIME SERIES
+
+1.	Use the "economics" dataset and Plot the following using geom_line():
+
+```{r}
+ggplot(economics, aes(date, pop)) + 
+  geom_line()
+```
+
+2.	Plot the unemployment growth rate over a period of time:
+
+```{r}
+ggplot(economics, aes(date, unemploy)) +  geom_line()
+```
+
+3.	Plot the graph to show how long people were unemployed?
+
+```{r}
+ggplot(economics, aes(date, unemploy / pop)) +
+  geom_line()
+```
+
+OR
+```{r}
+ggplot(economics, aes(date, uempmed)) + geom_line()
+```
+
+4.	Plot the below graph(HINT: Use POSIXlt() ; ggplot() +  geom_path() + geom_point()
+
+```{r}
+year <- function(x) as.POSIXlt(x)$year + 1900
+
+ggplot(economics, aes(unemploy/pop, uempmed)) +
+  geom_path() + 
+  geom_point(aes(color = year(date)))
+```
+
+#CLASS PRACTICE 7
+
+1.	Explore the distribution of the "carat" variable in the diamonds dataset. What banwidth reveals the most interesting patterns?
+
+```{r}
+ggplot(diamonds) +
+  geom_histogram(aes(carat), binwidth = 0.05)
+```
+
+```{r}
+ggplot(diamonds) +
+  geom_histogram(aes(carat), binwidth = 0.1)
+```
+
+```{r}
+ggplot(diamonds) +
+  geom_histogram(aes(carat), binwidth = 0.3)
+```
+
+The binwidth function for the histogram help us have a closer look at the distribution of the caret for diamonds.
+
+Bin selection will play a significant role in visualizations, with a possible change in frequency readouts and shape of the curve or function.
+
+We can see the data is left sweked and have negative relation. Smaller carat diamonds have higher sale and are easier to obtain.
+
+Bigger rocks are hard to come by.
+
+```{r}
+ggplot(diamonds, aes(x=carat)) + 
+  geom_freqpoly() + 
+  ggtitle("Diamond Frequency by Carat") + 
+  xlab("Carat Size") + 
+  ylab("Count")
+```
+
+2.	Explore the distribution of the "price" variable in the diamonds data. How does the distribution vary by cut?
+
+```{r}
+ggplot(diamonds) +
+  geom_histogram(aes(x = price), binwidth = 500) +
+  facet_grid(cut~.)
+```
+
+```{r}
+ggplot(diamonds) +
+  geom_boxplot(aes(x = cut, y = price))
+```
+
+As we can see, the diamonds cut of all types carry prices of all types, not really a way to determine how good or expensive a diamond is.
+
+Thus the diamonds price cannot be determined based on only one characteristics.
+
+```{r}
+ggplot(diamonds) + 
+  geom_histogram(binwidth=100, aes(price)) +
+  ggtitle("Diamond Price Distribution by Cut") + 
+  theme_minimal() + 
+  facet_wrap(~cut, scales="free_y")
+```
+
+Above plot thus provides us an average picture of price distribution of diamonds based on there cuts.
